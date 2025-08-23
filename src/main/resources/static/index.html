@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mitarbeiter – Frontend</title>
+    <style>
+    body { font-family: Arial, sans-serif; background: #f6f7fb; margin:0; color:#1f2937; }
+    header { padding:16px 20px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .container { max-width:900px; margin:20px auto; padding:0 16px; }
+    .card { background:#fff; border-radius:10px; padding:16px; box-shadow:0 4px 10px rgba(0,0,0,.08); margin-bottom:16px; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+    label { min-width:120px; }
+    input { flex:1; padding:10px; border:1px solid #ccc; border-radius:8px; }
+    button { padding:10px 14px; border:0; border-radius:8px; background:#2563eb; color:#fff; font-weight:bold; cursor:pointer; }
+    button.secondary { background:#10b981; }
+    pre { background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; overflow:auto; }
+    .muted { font-size:13px; color:#6b7280; }
+    .error { color:#b91c1c; font-weight:bold; }
+    table { width:100%; border-collapse: collapse; margin-top:10px; }
+    th, td { padding:8px; border:1px solid #ddd; text-align:left; }
+    th { background:#f3f4f6; }
+  </style>
+</head>
+<body>
+<header>
+    <h1>Mitarbeiter-Frontend (Spring API)</h1>
+    <div class="muted">Standard: http://localhost:8081/api</div>
+</header>
+
+<div class="container">
+
+    <!-- Basis-URL -->
+    <div class="card">
+        <div class="row">
+            <label for="baseUrl">Basis-URL</label>
+            <input id="baseUrl" value="http://localhost:8081/api" />
+            <button id="setBase">Übernehmen</button>
+            <button id="btnLoadAll" class="secondary">Alle laden</button>
+        </div>
+        <div id="allStatus" class="muted"></div>
+    </div>
+
+    <!-- Suche per ID -->
+    <div class="card">
+        <h3>Suche per ID</h3>
+        <div class="row">
+            <label for="idInput">ID</label>
+            <input id="idInput" type="number" placeholder="z. B. 1" />
+            <button id="btnIdSearch">Suchen</button>
+        </div>
+        <div id="idStatus" class="muted"></div>
+    </div>
+
+    <!-- Suche per Name -->
+    <div class="card">
+        <h3>Suche per Name (Vor- oder Nachname)</h3>
+        <div class="row">
+            <label for="nameInput">Name</label>
+            <input id="nameInput" type="text" placeholder="z. B. Max oder Mustermann" />
+            <button id="btnNameSearch">Suchen</button>
+        </div>
+        <div id="nameStatus" class="muted"></div>
+    </div>
+
+    <!-- Mitarbeiter hinzufügen -->
+    <div class="card">
+        <h3>Neuen Mitarbeiter hinzufügen</h3>
+        <div class="row">
+            <label for="vnNeu">Vorname</label>
+            <input id="vnNeu" type="text" placeholder="z. B. Max" />
+        </div>
+        <div class="row">
+            <label for="nnNeu">Nachname</label>
+            <input id="nnNeu" type="text" placeholder="z. B. Mustermann" />
+        </div>
+        <div class="row">
+            <label for="gehaltNeu">Gehalt</label>
+            <input id="gehaltNeu" type="number" placeholder="z. B. 4000" />
+        </div>
+        <div class="row">
+            <label for="stadtNeu">Stadt</label>
+            <input id="stadtNeu" type="text" placeholder="z. B. Berlin" />
+        </div>
+        <div class="row">
+            <button id="btnAddMitarbeiter" class="secondary">Hinzufügen</button>
+        </div>
+        <div id="addStatus" class="muted"></div>
+    </div>
+
+    <!-- Mitarbeiter aktualisieren -->
+    <div class="card">
+        <h3>Mitarbeiter aktualisieren</h3>
+        <div class="row">
+            <label for="updId">ID</label>
+            <input id="updId" type="number" placeholder="z. B. 1" />
+        </div>
+        <div class="row">
+            <label for="updVorname">Vorname</label>
+            <input id="updVorname" type="text" placeholder="z. B. Max" />
+        </div>
+        <div class="row">
+            <label for="updNachname">Nachname</label>
+            <input id="updNachname" type="text" placeholder="z. B. Mustermann" />
+        </div>
+        <div class="row">
+            <label for="updGehalt">Gehalt</label>
+            <input id="updGehalt" type="number" placeholder="z. B. 4000" />
+        </div>
+        <div class="row">
+            <label for="updStadt">Stadt</label>
+            <input id="updStadt" type="text" placeholder="z. B. Berlin" />
+        </div>
+        <div class="row">
+            <button id="btnUpdate" class="secondary">Aktualisieren</button>
+        </div>
+        <div id="updateStatus" class="muted"></div>
+    </div>
+
+    <!-- Mitarbeiter löschen -->
+    <div class="card">
+        <h3>Mitarbeiter löschen</h3>
+        <div class="row">
+            <label for="delId">ID</label>
+            <input id="delId" type="number" placeholder="z. B. 1" />
+            <button id="btnDelete" style="background:#b91c1c">Löschen</button>
+        </div>
+        <div id="deleteStatus" class="muted"></div>
+    </div>
+
+    <!-- Ergebnis -->
+    <div class="card">
+        <h3>Ergebnis</h3>
+        <pre id="singleResult" class="muted">Noch nichts geladen.</pre>
+    </div>
+
+    <!-- Alle Mitarbeiter -->
+    <div class="card">
+        <h3>Alle Mitarbeiter</h3>
+        <table id="tblAll">
+            <thead>
+            <tr>
+                <th>ID</th><th>Vorname</th><th>Nachname</th><th>Gehalt</th><th>Stadt</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+  var BASE = '';
+  function setBaseFromInput() {
+    var val = document.getElementById('baseUrl').value || '';
+    val = val.replace(/\/$/, '');
+    BASE = val;
+    setStatus('#allStatus', 'Basis-URL: ' + BASE, false);
+  }
+
+  function $(sel){ return document.querySelector(sel); }
+  function setStatus(id,msg,isErr){
+    var n=$(id); n.textContent=msg; n.className=isErr?'error':'muted';
+  }
+  function renderSingle(obj){
+    var pre=$('#singleResult');
+    if(!obj){ pre.textContent='Kein Ergebnis'; pre.className='error'; return; }
+    pre.className=''; pre.textContent=JSON.stringify(obj,null,2);
+  }
+  function renderAll(list){
+    var tbody=$('#tblAll tbody'); tbody.innerHTML='';
+    if(!Array.isArray(list)) return;
+    list.forEach(m=>{
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>'+m.id+'</td><td>'+m.vorname+'</td><td>'+m.nachname+'</td><td>'+m.gehalt+'</td><td>'+m.stadt+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+  function getJson(url){
+    return fetch(url).then(res=>{
+      if(!res.ok) return res.text().then(t=>{throw new Error('HTTP '+res.status+': '+t);});
+      return res.json();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    setBaseFromInput();
+    $('#setBase').addEventListener('click',setBaseFromInput);
+
+    // Alle laden
+    $('#btnLoadAll').addEventListener('click',()=>{
+      setStatus('#allStatus','Lade...',false);
+      getJson(BASE+'/alleMitarbeiter')
+        .then(d=>{renderAll(d); setStatus('#allStatus','Geladen: '+d.length+' Mitarbeiter',false);})
+        .catch(e=>setStatus('#allStatus','Fehler: '+e.message,true));
+    });
+
+    // Suche per ID
+    $('#btnIdSearch').addEventListener('click',()=>{
+      var id=$('#idInput').value.trim();
+      if(!id){ setStatus('#idStatus','Bitte ID eingeben',true); return; }
+      setStatus('#idStatus','Lade...',false);
+      getJson(BASE+'/id/'+encodeURIComponent(id))
+        .then(d=>{renderSingle(d); setStatus('#idStatus','Fertig',false);})
+        .catch(e=>{renderSingle(null); setStatus('#idStatus','Fehler: '+e.message,true);});
+    });
+
+    // Suche per Name (Vor- oder Nachname)
+    $('#btnNameSearch').addEventListener('click',()=>{
+      var n=$('#nameInput').value.trim();
+      if(!n){ setStatus('#nameStatus','Bitte Name eingeben',true); return; }
+      setStatus('#nameStatus','Lade...',false);
+      getJson(BASE+'/sucheMitarbeiter?vorname='+encodeURIComponent(n)+'&nachname='+encodeURIComponent(n))
+        .then(d=>{renderSingle(d); setStatus('#nameStatus','Fertig',false);})
+        .catch(e=>{renderSingle(null); setStatus('#nameStatus','Fehler: '+e.message,true);});
+    });
+
+    // Neuen Mitarbeiter hinzufügen
+    $('#btnAddMitarbeiter').addEventListener('click',()=>{
+      const neuMitarbeiter = {
+        vorname: $('#vnNeu').value.trim(),
+        nachname: $('#nnNeu').value.trim(),
+        gehalt: parseFloat($('#gehaltNeu').value.trim()),
+        stadt: $('#stadtNeu').value.trim()
+      };
+      if(!neuMitarbeiter.vorname || !neuMitarbeiter.nachname || !neuMitarbeiter.gehalt || !neuMitarbeiter.stadt){
+        setStatus('#addStatus','Bitte alle Felder ausfüllen',true); return;
+      }
+      setStatus('#addStatus','Sende...',false);
+      fetch(BASE+'/neuMitarbeiter',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(neuMitarbeiter)
+      })
+      .then(res=>{
+        if(!res.ok) return res.text().then(t=>{throw new Error('HTTP '+res.status+': '+t);});
+        return res.text();
+      })
+      .then(msg=>setStatus('#addStatus',msg,false))
+      .catch(err=>setStatus('#addStatus','Fehler: '+err.message,true));
+    });
+
+    // Mitarbeiter aktualisieren
+    $('#btnUpdate').addEventListener('click',()=>{
+      const updMitarbeiter = {
+        id: parseInt($('#updId').value.trim()),
+        vorname: $('#updVorname').value.trim(),
+        nachname: $('#updNachname').value.trim(),
+        gehalt: parseFloat($('#updGehalt').value.trim()),
+        stadt: $('#updStadt').value.trim()
+      };
+      if(!updMitarbeiter.id){ setStatus('#updateStatus','Bitte eine ID eingeben',true); return; }
+      setStatus('#updateStatus','Sende...',false);
+      fetch(BASE+'/updateMitarbeiter',{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(updMitarbeiter)
+      })
+      .then(res=>{
+        if(!res.ok) return res.text().then(t=>{throw new Error('HTTP '+res.status+': '+t);});
+        return res.text();
+      })
+      .then(msg=>setStatus('#updateStatus',msg,false))
+      .catch(err=>setStatus('#updateStatus','Fehler: '+err.message,true));
+    });
+
+    // Mitarbeiter löschen
+    $('#btnDelete').addEventListener('click',()=>{
+      const id=$('#delId').value.trim();
+      if(!id){ setStatus('#deleteStatus','Bitte eine ID eingeben',true); return; }
+      setStatus('#deleteStatus','Sende...',false);
+      fetch(BASE+'/deleteMitarbeiter?id='+encodeURIComponent(id),{
+        method:'DELETE'
+      })
+      .then(res=>{
+        if(!res.ok) return res.text().then(t=>{throw new Error('HTTP '+res.status+': '+t);});
+        return res.text();
+      })
+      .then(msg=>setStatus('#deleteStatus',msg,false))
+      .catch(err=>setStatus('#deleteStatus','Fehler: '+err.message,true));
+    });
+  });
+</script>
+</body>
+</html>
